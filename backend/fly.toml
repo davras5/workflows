@@ -1,0 +1,29 @@
+# Fly.io Configuration for GeoDataCheck Backend
+# See https://fly.io/docs/reference/configuration/
+
+app = "geodatacheck-api"
+primary_region = "fra"  # Frankfurt, Germany (closest to Switzerland)
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  SESSION_TIMEOUT_MINUTES = "30"
+  MAX_FILE_SIZE_MB = "50"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true      # Stop when no traffic (saves money)
+  auto_start_machines = true     # Start on incoming request
+  min_machines_running = 0       # Scale to zero when idle
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 250
+    soft_limit = 200
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512  # 512MB should be enough for Excel processing

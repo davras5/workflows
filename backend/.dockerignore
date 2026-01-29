@@ -1,0 +1,16 @@
+# Ignore these when building Docker image
+__pycache__
+*.pyc
+*.pyo
+.git
+.gitignore
+.env
+.venv
+venv
+*.md
+.pytest_cache
+.coverage
+htmlcov
+dist
+build
+*.egg-info
