@@ -5,8 +5,10 @@ Run with: uvicorn main:app --reload
 """
 
 import io
+import json
 import uuid
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Dict, Any, Optional, List
 from contextlib import asynccontextmanager
 
@@ -147,24 +149,103 @@ async def get_rules_by_category(category: str):
         raise HTTPException(status_code=400, detail=f"Invalid category: {category}")
 
 
-@app.post("/api/upload", response_model=UploadResponse)
-async def upload_file(file: UploadFile = File(...)):
+# ============================================================================
+# Workflows (loaded from workflows.json)
+# ============================================================================
+
+def load_workflows() -> List[Dict[str, Any]]:
+    """Load workflow definitions from workflows.json."""
+    workflows_path = Path(__file__).parent.parent / "workflows" / "workflows.json"
+    with open(workflows_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return data.get("workflows", [])
+
+
+# Load workflows at startup
+WORKFLOWS = load_workflows()
+
+
+def get_workflow_by_id(workflow_id: str) -> Optional[Dict[str, Any]]:
+    """Get a workflow by its ID."""
+    for workflow in WORKFLOWS:
+        if workflow['id'] == workflow_id:
+            return workflow
+    return None
+
+
+@app.get("/api/workflows")
+async def get_workflows():
+    """Get all available workflow configurations."""
+    # Return simplified list for gallery view
+    return {
+        "workflows": [
+            {
+                "id": w["id"],
+                "name": w["name"],
+                "type": w.get("type", "checker"),
+                "description": w["description"],
+                "description_long": w.get("description_long", w["description"]),
+                "category": w.get("category", ""),
+                "icon": w.get("icon", ""),
+                "input_formats": w.get("input", {}).get("formats", []),
+                "required_columns": w.get("columns", {}).get("required", []),
+            }
+            for w in WORKFLOWS
+        ]
+    }
+
+
+@app.get("/api/workflows/{workflow_id}")
+async def get_workflow(workflow_id: str):
+    """Get a specific workflow configuration with full details."""
+    workflow = get_workflow_by_id(workflow_id)
+    if not workflow:
+        raise HTTPException(status_code=404, detail=f"Workflow not found: {workflow_id}")
+    return workflow
+
+
+# ============================================================================
+# Workflow-Centric Endpoints
+# ============================================================================
+
+@app.post("/api/workflows/{workflow_id}/upload", response_model=UploadResponse)
+async def workflow_upload(workflow_id: str, file: UploadFile = File(...)):
     """
-    Upload an Excel file for validation.
+    Upload a file for a specific workflow.
 
     Returns session ID and detected column information.
     """
     cleanup_expired_sessions()
 
-    # Validate file type
-    if not file.filename.endswith(('.xlsx', '.xls')):
+    # Verify workflow exists
+    workflow = get_workflow_by_id(workflow_id)
+    if not workflow:
+        raise HTTPException(status_code=404, detail=f"Workflow not found: {workflow_id}")
+
+    # Check file format against workflow's accepted formats
+    input_config = workflow.get('input', {})
+    allowed_formats = input_config.get('formats', ['.xlsx', '.xls'])
+
+    file_ext = '.' + file.filename.split('.')[-1].lower() if '.' in file.filename else ''
+    if file_ext not in allowed_formats:
         raise HTTPException(
             status_code=400,
-            detail="Invalid file format. Please upload an Excel file (.xlsx or .xls)"
+            detail=f"Invalid file format. This workflow accepts: {', '.join(allowed_formats)}"
         )
 
+    # Check file size if specified
+    max_size_mb = input_config.get('max_size_mb')
+    if max_size_mb:
+        contents = await file.read()
+        if len(contents) > max_size_mb * 1024 * 1024:
+            raise HTTPException(
+                status_code=400,
+                detail=f"File too large. Maximum size: {max_size_mb} MB"
+            )
+        await file.seek(0)  # Reset file position
+
     try:
-        # Read file into memory (no disk storage)
+        # Read file into memory
         contents = await file.read()
         df = pd.read_excel(io.BytesIO(contents))
 
@@ -189,11 +270,13 @@ async def upload_file(file: UploadFile = File(...)):
                 sample_values=sample_values,
             ))
 
-        # Create session (store DataFrame temporarily)
+        # Create session with workflow context
         session_id = str(uuid.uuid4())
         sessions[session_id] = {
             'df': df,
             'filename': file.filename,
+            'workflow_id': workflow_id,
+            'workflow': workflow,
             'created_at': datetime.now(),
         }
 
@@ -205,36 +288,52 @@ async def upload_file(file: UploadFile = File(...)):
             expires_in_minutes=SESSION_TIMEOUT_MINUTES,
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error reading file: {str(e)}")
 
 
-@app.post("/api/validate/{session_id}")
-async def validate_data(session_id: str, config: ValidationConfig):
+@app.post("/api/workflows/{workflow_id}/sessions/{session_id}/validate")
+async def workflow_validate(workflow_id: str, session_id: str, config: ValidationConfig):
     """
-    Run validation on previously uploaded data.
+    Run validation for a specific workflow on uploaded data.
 
     Returns validation results with dimensional breakdowns.
     """
     cleanup_expired_sessions()
 
+    # Verify workflow exists
+    workflow = get_workflow_by_id(workflow_id)
+    if not workflow:
+        raise HTTPException(status_code=404, detail=f"Workflow not found: {workflow_id}")
+
     if session_id not in sessions:
         raise HTTPException(status_code=404, detail="Session not found or expired")
 
     session = sessions[session_id]
-    df = session.get('df')
 
+    # Verify session belongs to this workflow
+    if session.get('workflow_id') != workflow_id:
+        raise HTTPException(status_code=400, detail="Session does not belong to this workflow")
+
+    df = session.get('df')
     if df is None:
         raise HTTPException(status_code=404, detail="Session data not available")
 
-    # Build config
+    # Build config - use workflow's default rules if none specified
+    rule_ids = config.rule_ids
+    if rule_ids is None and workflow.get('rules'):
+        # Use workflow's enabled rules by default
+        rule_ids = [r['id'] for r in workflow['rules'] if r.get('default_enabled', True)]
+
     validation_config = {
         'columns': config.columns or engine.detect_columns(df),
         'options': config.options,
     }
 
     # Run validation
-    result = engine.validate(df, validation_config, config.rule_ids)
+    result = engine.validate(df, validation_config, rule_ids)
 
     # Add dimensional analysis
     result_dict = result.to_dict()
@@ -244,26 +343,35 @@ async def validate_data(session_id: str, config: ValidationConfig):
         if dim_col and dim_col in df.columns:
             result_dict[f'by_{dim_name}'] = result.get_errors_by_dimension(df, dim_col)
 
-    # Store result in session for later download
+    # Store result in session
     session['result'] = result
     session['config'] = validation_config
 
     return result_dict
 
 
-@app.get("/api/session/{session_id}/download/report")
-async def download_report(session_id: str):
+@app.get("/api/workflows/{workflow_id}/sessions/{session_id}/report")
+async def workflow_download_report(workflow_id: str, session_id: str):
     """
-    Download validation error report as Excel.
+    Download validation report for a workflow session.
     """
     cleanup_expired_sessions()
+
+    # Verify workflow exists
+    workflow = get_workflow_by_id(workflow_id)
+    if not workflow:
+        raise HTTPException(status_code=404, detail=f"Workflow not found: {workflow_id}")
 
     if session_id not in sessions:
         raise HTTPException(status_code=404, detail="Session not found or expired")
 
     session = sessions[session_id]
-    result = session.get('result')
 
+    # Verify session belongs to this workflow
+    if session.get('workflow_id') != workflow_id:
+        raise HTTPException(status_code=400, detail="Session does not belong to this workflow")
+
+    result = session.get('result')
     if result is None:
         raise HTTPException(status_code=400, detail="No validation results. Run validation first.")
 
@@ -273,13 +381,14 @@ async def download_report(session_id: str):
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         # Summary sheet
         summary_data = {
-            'Metrik': ['Total Zeilen', 'Fehler', 'Warnungen', 'Bestanden', 'Erfolgsquote'],
+            'Metrik': ['Workflow', 'Total Zeilen', 'Fehler', 'Warnungen', 'Bestanden', 'Erfolgsquote'],
             'Wert': [
+                workflow['name'],
                 result.total_rows,
                 result.error_count,
                 result.warning_count,
                 result.passed_rows,
-                f"{round(result.passed_rows / result.total_rows * 100, 1)}%"
+                f"{round(result.passed_rows / result.total_rows * 100, 1)}%" if result.total_rows > 0 else "N/A"
             ]
         }
         pd.DataFrame(summary_data).to_excel(writer, sheet_name='Zusammenfassung', index=False)
@@ -304,23 +413,29 @@ async def download_report(session_id: str):
     output.seek(0)
 
     filename = session.get('filename', 'data').replace('.xlsx', '').replace('.xls', '')
+    workflow_name = workflow['id'].replace('-', '_')
 
     return StreamingResponse(
         output,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={
-            "Content-Disposition": f"attachment; filename={filename}_fehler.xlsx"
+            "Content-Disposition": f"attachment; filename={filename}_{workflow_name}_report.xlsx"
         }
     )
 
 
-@app.delete("/api/session/{session_id}")
-async def delete_session(session_id: str):
+@app.delete("/api/workflows/{workflow_id}/sessions/{session_id}")
+async def workflow_delete_session(workflow_id: str, session_id: str):
     """
-    Explicitly delete a session and all associated data.
+    Delete a workflow session and all associated data.
     """
     if session_id in sessions:
         session = sessions[session_id]
+
+        # Verify session belongs to this workflow (if workflow_id stored)
+        if session.get('workflow_id') and session.get('workflow_id') != workflow_id:
+            raise HTTPException(status_code=400, detail="Session does not belong to this workflow")
+
         if isinstance(session, SessionData):
             session.cleanup()
         elif isinstance(session, dict):
@@ -328,74 +443,6 @@ async def delete_session(session_id: str):
         del sessions[session_id]
 
     return {"status": "ok", "message": "Session deleted"}
-
-
-# ============================================================================
-# Checkers (Workflow configurations)
-# ============================================================================
-
-CHECKERS = [
-    {
-        'id': 'address-checker',
-        'name': 'Adress-Checker',
-        'description': 'Prüft Schweizer Adressen auf Format, PLZ-Format und Kantone.',
-        'description_long': 'Dieser Checker validiert PLZ-Format (4-stellig), Kantonsabkürzungen und Strassenformate.',
-        'category': 'QUALITÄTSSICHERUNG',
-        'required_columns': ['plz', 'ort', 'strasse'],
-        'rule_ids': ['R-ADDR-01', 'R-ADDR-02', 'R-ADDR-04', 'R-ADDR-05'],
-    },
-    {
-        'id': 'coordinate-checker',
-        'name': 'Koordinaten-Checker',
-        'description': 'Prüft ob Koordinaten innerhalb der Schweiz liegen (LV95/WGS84).',
-        'description_long': 'Validiert E/N-Koordinaten gegen Schweizer Grenzen, erkennt automatisch LV95 oder WGS84.',
-        'category': 'KOORDINATEN',
-        'required_columns': ['easting', 'northing'],
-        'rule_ids': ['R-COORD-01', 'R-COORD-02', 'R-COORD-04'],
-    },
-    {
-        'id': 'egid-checker',
-        'name': 'EGID/GWR Checker',
-        'description': 'Validiert EGID-Nummern auf Format und Eindeutigkeit.',
-        'description_long': 'Prüft Eidgenössische Gebäudeidentifikatoren (EGID) auf korrektes Format und Duplikate.',
-        'category': 'EGID',
-        'required_columns': ['egid'],
-        'rule_ids': ['R-EGID-01', 'R-EGID-02', 'R-EGID-03'],
-    },
-    {
-        'id': 'quality-checker',
-        'name': 'Datenqualitäts-Check',
-        'description': 'Erkennt doppelte Zeilen, leere Einträge und Kodierungsprobleme.',
-        'description_long': 'Allgemeine Datenqualitätsprüfungen: Duplikate, leere Zeilen, Datentyp-Konsistenz, Zeichenkodierung.',
-        'category': 'QUALITÄTSSICHERUNG',
-        'required_columns': [],
-        'rule_ids': ['R-GEN-01', 'R-GEN-02', 'R-GEN-03', 'R-GEN-04'],
-    },
-    {
-        'id': 'full-checker',
-        'name': 'Portfolio Vollständigkeits-Check',
-        'description': 'Führt alle Prüfungen durch: Adressen, Koordinaten, EGID und Qualität.',
-        'description_long': 'Umfassende Validierung mit allen verfügbaren Regeln für eine vollständige Portfolioprüfung.',
-        'category': 'QUALITÄTSSICHERUNG',
-        'required_columns': [],
-        'rule_ids': None,  # All rules
-    },
-]
-
-
-@app.get("/api/checkers")
-async def get_checkers():
-    """Get all available checker configurations."""
-    return {"checkers": CHECKERS}
-
-
-@app.get("/api/checkers/{checker_id}")
-async def get_checker(checker_id: str):
-    """Get a specific checker configuration."""
-    for checker in CHECKERS:
-        if checker['id'] == checker_id:
-            return checker
-    raise HTTPException(status_code=404, detail=f"Checker not found: {checker_id}")
 
 
 # ============================================================================

@@ -1,0 +1,404 @@
+{
+  "$schema": "./workflows.schema.json",
+  "workflows": [
+    {
+      "id": "egid-gwr-checker",
+      "name": "EGID/GWR Checker",
+      "type": "checker",
+      "description": "Validiert EGID-Nummern und GWR-Daten auf Format, Vollständigkeit und Konsistenz.",
+      "description_long": "Prüft Eidgenössische Gebäudeidentifikatoren (EGID) und Gebäude- und Wohnungsregister (GWR) Daten. Validiert Format, Eindeutigkeit, und optionaler Abgleich mit dem offiziellen GWR.",
+      "category": "EGID",
+      "input": {
+        "formats": [".xlsx", ".xls", ".csv"],
+        "formats_description": "Excel oder CSV-Datei mit EGID-Spalte",
+        "max_size_mb": 50
+      },
+      "inputs": [
+        {
+          "id": "egid",
+          "name": "EGID",
+          "description": "Eidgenössischer Gebäudeidentifikator",
+          "format": "integer",
+          "format_description": "8-9 stellige Zahl",
+          "example": "123456789",
+          "required": true
+        },
+        {
+          "id": "ewid",
+          "name": "EWID",
+          "description": "Eidgenössischer Wohnungsidentifikator",
+          "format": "integer",
+          "format_description": "3-stellige Zahl",
+          "example": "001",
+          "required": false
+        },
+        {
+          "id": "strasse",
+          "name": "Strasse",
+          "description": "Strassenname und Hausnummer",
+          "format": "string",
+          "example": "Bundesplatz 3",
+          "required": false
+        },
+        {
+          "id": "plz",
+          "name": "PLZ",
+          "description": "Postleitzahl",
+          "format": "integer",
+          "format_description": "4-stellige Schweizer PLZ",
+          "example": "3003",
+          "required": false
+        },
+        {
+          "id": "ort",
+          "name": "Ort",
+          "description": "Ortsname",
+          "format": "string",
+          "example": "Bern",
+          "required": false
+        },
+        {
+          "id": "kanton",
+          "name": "Kanton",
+          "description": "Kantonskürzel",
+          "format": "string",
+          "format_description": "2-Buchstaben Kantonskürzel",
+          "allowed_values": ["ZH", "BE", "LU", "UR", "SZ", "OW", "NW", "GL", "ZG", "FR", "SO", "BS", "BL", "SH", "AR", "AI", "SG", "GR", "AG", "TG", "TI", "VD", "VS", "NE", "GE", "JU"],
+          "example": "BE",
+          "required": false
+        }
+      ],
+      "outputs": [
+        {
+          "id": "row_number",
+          "name": "Zeile",
+          "description": "Zeilennummer im Originaldatensatz",
+          "format": "integer",
+          "required": true
+        },
+        {
+          "id": "rule_id",
+          "name": "Regel-ID",
+          "description": "Identifikator der verletzten Regel",
+          "format": "string",
+          "required": true
+        },
+        {
+          "id": "severity",
+          "name": "Schweregrad",
+          "description": "Fehlerklassifizierung",
+          "format": "string",
+          "allowed_values": ["error", "warning", "info"],
+          "required": true
+        },
+        {
+          "id": "message",
+          "name": "Meldung",
+          "description": "Beschreibung des Problems",
+          "format": "string",
+          "required": true
+        },
+        {
+          "id": "value",
+          "name": "Wert",
+          "description": "Der fehlerhafte Wert",
+          "format": "string",
+          "required": false
+        },
+        {
+          "id": "suggestion",
+          "name": "Vorschlag",
+          "description": "Korrekturvorschlag (falls verfügbar)",
+          "format": "string",
+          "required": false
+        }
+      ],
+      "rules": [
+        {
+          "id": "R-EGID-01",
+          "name_de": "EGID Format",
+          "description_de": "EGID muss eine gültige 8-9 stellige Zahl sein",
+          "severity": "error",
+          "default_enabled": true,
+          "category": "format"
+        },
+        {
+          "id": "R-EGID-02",
+          "name_de": "EGID Eindeutigkeit",
+          "description_de": "Keine doppelten EGID-Nummern im Datensatz",
+          "severity": "error",
+          "default_enabled": true,
+          "category": "consistency"
+        },
+        {
+          "id": "R-EGID-03",
+          "name_de": "EGID Pflichtfeld",
+          "description_de": "EGID darf nicht leer sein",
+          "severity": "error",
+          "default_enabled": true,
+          "category": "completeness"
+        }
+      ],
+      "rule_categories": [
+        {"id": "format", "name_de": "Format"},
+        {"id": "consistency", "name_de": "Konsistenz"},
+        {"id": "completeness", "name_de": "Vollständigkeit"}
+      ]
+    },
+    {
+      "id": "cafm-basisplan-checker",
+      "name": "CAFM Basisplan Checker",
+      "type": "checker",
+      "description": "Validiert DWG/DXF-Dateien gegen die BBL CAFM Basisplan Richtlinien.",
+      "description_long": "Prüft CAD-Zeichnungen auf Einhaltung der BBL-Layerstruktur, Namenskonventionen, Farbcodes und Linientypen gemäss den CAFM Basisplan Anforderungen.",
+      "category": "CAD",
+      "input": {
+        "formats": [".dwg", ".dxf"],
+        "formats_description": "AutoCAD DWG oder DXF Zeichnungsdatei",
+        "max_size_mb": 100
+      },
+      "outputs": [
+        {
+          "id": "layer_name",
+          "name": "Layer",
+          "description": "Name des CAD-Layers",
+          "format": "string",
+          "example": "A-RAUM",
+          "required": true
+        },
+        {
+          "id": "element_type",
+          "name": "Elementtyp",
+          "description": "Art des CAD-Elements",
+          "format": "string",
+          "allowed_values": ["LINE", "POLYLINE", "ARC", "CIRCLE", "TEXT", "MTEXT", "BLOCK", "HATCH", "DIMENSION"],
+          "required": false
+        },
+        {
+          "id": "rule_id",
+          "name": "Regel-ID",
+          "description": "Identifikator der verletzten Regel",
+          "format": "string",
+          "required": true
+        },
+        {
+          "id": "severity",
+          "name": "Schweregrad",
+          "description": "Fehlerklassifizierung",
+          "format": "string",
+          "allowed_values": ["error", "warning", "info"],
+          "required": true
+        },
+        {
+          "id": "message",
+          "name": "Meldung",
+          "description": "Beschreibung des Problems",
+          "format": "string",
+          "required": true
+        },
+        {
+          "id": "expected_value",
+          "name": "Erwartet",
+          "description": "Erwarteter Wert gemäss BBL-Richtlinie",
+          "format": "string",
+          "required": false
+        },
+        {
+          "id": "actual_value",
+          "name": "Gefunden",
+          "description": "Tatsächlich gefundener Wert",
+          "format": "string",
+          "required": false
+        }
+      ],
+      "rules": [
+        {
+          "id": "R-CAD-01",
+          "name_de": "Layer-Struktur",
+          "description_de": "Alle erforderlichen BBL-Layer müssen vorhanden sein (A-RAUM, A-WAND, etc.)",
+          "severity": "error",
+          "default_enabled": true,
+          "category": "structure"
+        },
+        {
+          "id": "R-CAD-02",
+          "name_de": "Layer-Benennung",
+          "description_de": "Layer-Namen müssen der BBL-Konvention entsprechen (Präfix A-, E-, H-, etc.)",
+          "severity": "error",
+          "default_enabled": true,
+          "category": "naming"
+        },
+        {
+          "id": "R-CAD-03",
+          "name_de": "Farbcodes",
+          "description_de": "Layer-Farben müssen den BBL-Vorgaben entsprechen (ACI-Farbindex)",
+          "severity": "warning",
+          "default_enabled": true,
+          "category": "appearance"
+        },
+        {
+          "id": "R-CAD-04",
+          "name_de": "Linientypen",
+          "description_de": "Linientypen müssen den BBL-Vorgaben entsprechen (Continuous, Dashed, etc.)",
+          "severity": "warning",
+          "default_enabled": true,
+          "category": "appearance"
+        },
+        {
+          "id": "R-CAD-05",
+          "name_de": "Textstile",
+          "description_de": "Textstile und Schriftarten müssen konform sein (Arial, ISO)",
+          "severity": "info",
+          "default_enabled": false,
+          "category": "appearance"
+        },
+        {
+          "id": "R-CAD-06",
+          "name_de": "Koordinatensystem",
+          "description_de": "Zeichnung muss im korrekten Koordinatensystem (LV95) sein",
+          "severity": "error",
+          "default_enabled": true,
+          "category": "structure"
+        },
+        {
+          "id": "R-CAD-07",
+          "name_de": "Blockdefinitionen",
+          "description_de": "Verwendete Blöcke müssen BBL-Standard entsprechen",
+          "severity": "warning",
+          "default_enabled": true,
+          "category": "naming"
+        }
+      ],
+      "rule_categories": [
+        {"id": "structure", "name_de": "Struktur"},
+        {"id": "naming", "name_de": "Benennung"},
+        {"id": "appearance", "name_de": "Darstellung"}
+      ]
+    },
+    {
+      "id": "ifc-to-excel",
+      "name": "Export IFC to Excel",
+      "type": "converter",
+      "description": "Exportiert Gebäudedaten aus IFC-Dateien in ein Excel-Format.",
+      "description_long": "Extrahiert Räume, Bauteile und deren Eigenschaften aus IFC-Dateien (BIM) und erstellt eine strukturierte Excel-Tabelle für die weitere Verarbeitung in CAFM-Systemen.",
+      "category": "BIM",
+      "input": {
+        "formats": [".ifc"],
+        "formats_description": "IFC-Datei (Industry Foundation Classes, Version 2x3 oder 4)",
+        "max_size_mb": 200
+      },
+      "parameters": [
+        {
+          "id": "element_types",
+          "name_de": "Elementtypen",
+          "description_de": "Welche IFC-Elemente sollen exportiert werden?",
+          "type": "select",
+          "options": [
+            {"value": "all", "label": "Alle Elemente"},
+            {"value": "spaces", "label": "Nur Räume (IfcSpace)"},
+            {"value": "building_elements", "label": "Nur Bauteile (Wände, Türen, Fenster)"}
+          ],
+          "default": "all"
+        },
+        {
+          "id": "include_properties",
+          "name_de": "Eigenschaften einbeziehen",
+          "description_de": "IFC PropertySets und Attribute exportieren",
+          "type": "boolean",
+          "default": true
+        },
+        {
+          "id": "include_geometry",
+          "name_de": "Geometrie-Daten",
+          "description_de": "Bounding Box und Flächen-/Volumenangaben exportieren",
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "id": "hierarchy",
+          "name_de": "Gebäudehierarchie",
+          "description_de": "Projekt > Gebäude > Stockwerk > Raum Struktur beibehalten",
+          "type": "boolean",
+          "default": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "global_id",
+          "name": "GlobalId",
+          "description": "IFC Global Unique Identifier",
+          "format": "string",
+          "format_description": "22-stelliger Base64-kodierter GUID",
+          "example": "3cUkl32yn9qRSPv0i4TXL4",
+          "required": true
+        },
+        {
+          "id": "ifc_type",
+          "name": "IFC-Typ",
+          "description": "IFC-Elementklasse",
+          "format": "string",
+          "allowed_values": ["IfcSpace", "IfcWall", "IfcDoor", "IfcWindow", "IfcSlab", "IfcColumn", "IfcBeam", "IfcStair", "IfcRoof"],
+          "example": "IfcSpace",
+          "required": true
+        },
+        {
+          "id": "name",
+          "name": "Name",
+          "description": "Elementbezeichnung aus IFC",
+          "format": "string",
+          "example": "Büro 101",
+          "required": true
+        },
+        {
+          "id": "long_name",
+          "name": "Langname",
+          "description": "Erweiterte Bezeichnung (falls vorhanden)",
+          "format": "string",
+          "required": false
+        },
+        {
+          "id": "building",
+          "name": "Gebäude",
+          "description": "Zugehöriges Gebäude",
+          "format": "string",
+          "example": "Hauptgebäude",
+          "required": false
+        },
+        {
+          "id": "storey",
+          "name": "Stockwerk",
+          "description": "Zugehöriges Stockwerk",
+          "format": "string",
+          "example": "1. OG",
+          "required": false
+        },
+        {
+          "id": "area",
+          "name": "Fläche",
+          "description": "Nettofläche in m²",
+          "format": "number",
+          "format_description": "Dezimalzahl mit 2 Nachkommastellen",
+          "example": "25.50",
+          "required": false
+        },
+        {
+          "id": "volume",
+          "name": "Volumen",
+          "description": "Nettovolumen in m³",
+          "format": "number",
+          "format_description": "Dezimalzahl mit 2 Nachkommastellen",
+          "example": "76.50",
+          "required": false
+        },
+        {
+          "id": "usage_type",
+          "name": "Nutzungsart",
+          "description": "Raumnutzung gemäss SIA 416",
+          "format": "string",
+          "example": "Büro",
+          "required": false
+        }
+      ]
+    }
+  ]
+}

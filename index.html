@@ -3,23 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GeoDataCheck - BBL</title>
+    <title>DRES Workflows - BBL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
     <style>
         :root {
-            --primary: #1E3A5F;
-            --primary-light: #2d4a6f;
-            --error: #E3000F;
-            --error-light: #fee2e2;
-            --warning: #F57C00;
-            --warning-light: #fff3e0;
-            --success: #2E7D32;
-            --success-light: #e8f5e9;
-            --info: #1976D2;
-            --bg: #F5F5F5;
+            /* CD Bund colors - based on KBOB FDK */
+            --primary: #DC0018;
+            --primary-dark: #B00014;
+            --secondary: #006699;
+            --secondary-dark: #005580;
+
+            --text: #1a2a3a;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+
+            --bg: #FFFFFF;
             --surface: #FFFFFF;
-            --text: #212121;
-            --text-secondary: #757575;
-            --border: #e0e0e0;
+            --surface-alt: #f7fafc;
+            --surface-dark: #3d4f5f;
+            --surface-darker: #2d3a44;
+
+            --border: #e2e8f0;
+            --border-input: #9ca3af;
+
+            --success: #3C763D;
+            --success-light: #DFF0D8;
+            --warning: #8A6D3B;
+            --warning-light: #FCF8E3;
+            --error: #DC0018;
+            --error-light: #F2DEDE;
+            --info: #31708F;
+            --info-light: #D9EDF7;
+
+            /* Spacing - 4px base */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-2xl: 48px;
+
+            /* Typography */
+            --text-display: 2.25rem;
+            --text-h1: 1.75rem;
+            --text-h2: 1.5rem;
+            --text-h3: 1.25rem;
+            --text-h4: 1.125rem;
+            --text-body: 1rem;
+            --text-body-sm: 0.875rem;
+            --text-caption: 0.75rem;
+
+            /* Layout */
+            --container-max-width: 1564px;
+            --container-padding: var(--space-xl);
+
+            /* Border Radius */
+            --border-radius-sm: 2px;
+            --border-radius: 4px;
+            --border-radius-lg: 8px;
+            --border-radius-full: 9999px;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow: 0 2px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.06);
+
+            /* Backwards compatibility */
+            --accent: var(--primary);
+            --accent-light: var(--error-light);
         }
 
         * {
@@ -29,37 +83,249 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
             background: var(--bg);
             color: var(--text);
+            font-size: var(--text-body);
             line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top bar - CD Bund dark style */
+        .top-bar {
+            background: var(--surface-darker);
+            font-size: var(--text-body-sm);
+        }
+
+        .top-bar__container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 46px;
+            max-width: var(--container-max-width);
+            margin-inline: auto;
+            padding-inline: var(--container-padding);
+        }
+
+        .top-bar__link {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: color 150ms ease;
+        }
+
+        .top-bar__link:hover {
+            color: white;
+        }
+
+        .language-selector {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .language-selector button {
+            background: none;
+            border: none;
+            padding: var(--space-xs) var(--space-sm);
+            font-size: var(--text-body-sm);
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 150ms ease;
+        }
+
+        .language-selector button:hover {
+            color: white;
+        }
+
+        .language-selector button.active {
+            color: white;
+            font-weight: 600;
+        }
+
+        .language-selector span {
+            color: rgba(255,255,255,0.4);
         }
 
         /* Header */
         header {
-            background: var(--primary);
-            color: white;
-            padding: 1rem 2rem;
+            background: white;
+            flex-shrink: 0;
+        }
+
+        .header__top {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding-block: var(--space-lg);
+            padding-inline: var(--container-padding);
+            max-width: var(--container-max-width);
+            margin-inline: auto;
         }
 
-        header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
+        .header-logo {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
         }
 
-        header .subtitle {
-            font-size: 0.875rem;
-            opacity: 0.8;
+        .header-logo .logo-flag {
+            width: 30px;
+            height: auto;
+            flex-shrink: 0;
         }
 
-        /* Main container */
+        .header-logo .logo-name {
+            height: 40px;
+            width: auto;
+        }
+
+        .header-logo .logo-divider {
+            width: 1px;
+            height: 48px;
+            background: var(--border);
+            margin: 0 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: var(--text-body-sm);
+            line-height: 1.5;
+            color: var(--text);
+            padding-top: 0.125rem;
+        }
+
+        .header-title strong {
+            font-weight: 700;
+        }
+
+        .header-title span {
+            color: var(--text-secondary);
+        }
+
+        .header__top .session-timer {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Main Navigation */
+        .main-nav {
+            background: white;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            height: 64px;
+        }
+
+        .main-nav .container {
+            height: 100%;
+        }
+
+        .main-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            gap: var(--space-xl);
+            height: 100%;
+            align-items: stretch;
+        }
+
+        .main-nav li {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            height: 100%;
+            font-size: var(--text-body);
+            transition: color 150ms ease;
+        }
+
+        .nav-link:hover:not(.active) {
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            color: var(--text);
+            position: relative;
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        /* Container utility - KBOB FDK pattern */
+        .container {
+            width: 100%;
+            max-width: var(--container-max-width);
+            margin-inline: auto;
+            padding-inline: var(--container-padding);
+        }
+
+        .container--narrow {
+            max-width: 900px;
+        }
+
+        /* Main - full width wrapper, padding for vertical spacing */
         main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+            flex: 1;
+            width: 100%;
+            padding-block: var(--space-2xl);
+        }
+
+        /* Views - all use same container max-width for consistency */
+        .view {
+            width: 100%;
+            max-width: var(--container-max-width);
+            margin-inline: auto;
+            padding-inline: var(--container-padding);
+        }
+
+        #apiView .api-header {
+            margin-bottom: var(--space-lg);
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: var(--text-body-sm);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-xl);
+        }
+
+        .breadcrumb a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 150ms ease;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary);
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-muted);
+        }
+
+        .breadcrumb-current {
+            color: var(--text);
         }
 
         /* Views */
@@ -74,127 +340,209 @@
         /* Cards */
         .card {
             background: var(--surface);
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
         }
 
         .card h2 {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            color: var(--primary);
-        }
-
-        /* Checker Gallery */
-        .checker-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1rem;
-        }
-
-        .checker-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.25rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .checker-card:hover {
-            border-color: var(--primary);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .checker-card .category {
-            font-size: 0.75rem;
-            color: var(--warning);
+            font-size: var(--text-h3);
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-sm);
+            color: var(--text);
         }
 
-        .checker-card h3 {
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
+        /* Section title - CD Bund style */
+        .section-title {
+            font-size: var(--text-display);
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: var(--space-2xl);
+            line-height: 1.2;
+            letter-spacing: -0.5px;
         }
 
-        .checker-card p {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
+        /* Workflow Gallery */
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-xl);
         }
 
-        .checker-card .required {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
+        @media (max-width: 1024px) {
+            .workflow-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
-        .checker-card .btn-start {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            margin-top: 1rem;
-            padding: 0.5rem 1rem;
-            background: var(--primary);
-            color: white;
+        @media (max-width: 640px) {
+            .workflow-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .workflow-card {
+            background: var(--surface);
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.875rem;
+            transition: all 150ms ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: var(--shadow);
+            overflow: hidden;
         }
 
-        .checker-card .btn-start:hover {
-            background: var(--primary-light);
+        .workflow-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .workflow-card .card-image {
+            width: 100%;
+            height: 200px;
+            background: var(--surface-alt);
+            overflow: hidden;
+        }
+
+        .workflow-card .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 300ms ease;
+        }
+
+        .workflow-card:hover .card-image img {
+            transform: scale(1.05);
+        }
+
+        .workflow-card .card-content {
+            padding: var(--space-xl);
+            padding-bottom: 5rem;
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .workflow-card .workflow-type {
+            font-size: var(--text-body-sm);
+            color: var(--text-muted);
+            margin-bottom: var(--space-sm);
+        }
+
+        .workflow-card h3 {
+            font-size: var(--text-h4);
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+            color: var(--text);
+            line-height: 1.3;
+            transition: color 150ms ease;
+        }
+
+        .workflow-card:hover h3 {
+            color: var(--primary);
+        }
+
+        .workflow-card p {
+            font-size: var(--text-body);
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .workflow-card .btn-arrow {
+            position: absolute;
+            bottom: var(--space-xl);
+            right: var(--space-xl);
+            width: 44px;
+            height: 44px;
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 150ms ease;
+        }
+
+        .workflow-card .btn-arrow:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Workflow Header */
+        .workflow-header {
+            margin-bottom: var(--space-xl);
+        }
+
+        .workflow-header .section-title {
+            margin-bottom: var(--space-sm);
+        }
+
+        /* Card hint text */
+        .card-hint {
+            font-size: var(--text-body-sm);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-lg);
         }
 
         /* Upload area */
         .upload-area {
             border: 2px dashed var(--border);
-            border-radius: 8px;
-            padding: 3rem;
+            border-radius: var(--border-radius-lg);
+            padding: var(--space-2xl);
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 150ms ease;
+            background: var(--surface-alt);
         }
 
         .upload-area:hover, .upload-area.dragover {
             border-color: var(--primary);
-            background: #f0f4f8;
-        }
-
-        .upload-area .icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+            background: #ebf4ff;
         }
 
         .upload-area input[type="file"] {
             display: none;
         }
 
-        /* Privacy notice */
-        .privacy-notice {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            color: var(--success);
-            margin-top: 1rem;
-            justify-content: center;
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto var(--space-md);
+            color: var(--text-muted);
+        }
+
+        .upload-title {
+            font-size: var(--text-body);
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: var(--space-xs);
+        }
+
+        .upload-hint {
+            font-size: var(--text-body-sm);
+            color: var(--text-secondary);
+        }
+
+        .upload-formats {
+            margin-top: var(--space-md);
+            font-size: var(--text-body-sm);
+            color: var(--text-muted);
         }
 
         /* Buttons */
         .btn {
-            padding: 0.75rem 1.5rem;
+            padding: var(--space-sm) var(--space-md);
             border-radius: 4px;
-            font-size: 0.875rem;
+            font-size: var(--text-body);
+            font-weight: 500;
             cursor: pointer;
-            border: none;
-            transition: all 0.2s;
+            border: 1px solid transparent;
+            transition: all 150ms ease;
         }
 
         .btn-primary {
@@ -203,17 +551,27 @@
         }
 
         .btn-primary:hover {
-            background: var(--primary-light);
+            background: var(--primary-dark);
         }
 
         .btn-secondary {
-            background: var(--surface);
-            color: var(--text);
-            border: 1px solid var(--border);
+            background: var(--secondary);
+            color: white;
         }
 
         .btn-secondary:hover {
-            background: var(--bg);
+            background: var(--secondary-dark);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
         }
 
         .btn:disabled {
@@ -239,13 +597,6 @@
             border: 1px solid var(--border);
             border-radius: 4px;
             font-size: 0.875rem;
-        }
-
-        /* Column mapping grid */
-        .mapping-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
         }
 
         /* Stats cards */
@@ -274,36 +625,37 @@
             color: var(--text-secondary);
         }
 
-        .stat-card.error .value { color: var(--error); }
+        .stat-card.error .value { color: var(--accent); }
         .stat-card.warning .value { color: var(--warning); }
         .stat-card.success .value { color: var(--success); }
 
         /* Tabs */
         .tabs {
             display: flex;
-            gap: 0.5rem;
+            gap: 0;
             margin-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
         }
 
         .tab-btn {
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.25rem;
             background: none;
             border: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
             cursor: pointer;
-            font-size: 0.875rem;
+            font-size: 1rem;
             color: var(--text-secondary);
-            border-radius: 4px;
         }
 
         .tab-btn.active {
-            background: var(--primary);
-            color: white;
+            color: var(--primary-dark);
+            border-bottom-color: var(--accent);
+            font-weight: 500;
         }
 
         .tab-btn:hover:not(.active) {
-            background: var(--bg);
+            color: var(--primary-dark);
         }
 
         /* Dimension cards */
@@ -389,8 +741,8 @@
         }
 
         .severity-badge.error {
-            background: var(--error-light);
-            color: var(--error);
+            background: var(--accent-light);
+            color: var(--accent);
         }
 
         .severity-badge.warning {
@@ -401,22 +753,6 @@
         .severity-badge.info {
             background: #e3f2fd;
             color: var(--info);
-        }
-
-        /* Back button */
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
-            cursor: pointer;
-        }
-
-        .back-btn:hover {
-            color: var(--text);
         }
 
         /* Loading */
@@ -449,12 +785,126 @@
             gap: 0.25rem;
         }
 
-        /* Footer */
+        /* Footer - full width background, contained content */
         footer {
-            text-align: center;
-            padding: 1rem;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
+            background: var(--surface-darker);
+            color: white;
+            font-size: var(--text-body-sm);
+            flex-shrink: 0;
+        }
+
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--border);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: var(--space-xl);
+        }
+
+        .footer-privacy {
+            color: white;
+        }
+
+        /* Contact Section - full width background, contained content */
+        .contact-section {
+            background: var(--surface-dark);
+            color: white;
+            padding-block: var(--space-2xl);
+            flex-shrink: 0;
+        }
+
+        .contact-section .container {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .contact-details h3 {
+            color: white;
+            font-size: var(--text-h2);
+            font-weight: 400;
+            margin-bottom: var(--space-lg);
+        }
+
+        .contact-info {
+            font-size: var(--text-body);
+            line-height: 1.8;
+            font-style: normal;
+        }
+
+        .contact-info a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
+        .contact-copyright {
+            display: block;
+            margin-top: var(--space-md);
+            font-size: var(--text-body-sm);
+            color: var(--text-muted);
+            max-width: 400px;
+            line-height: 1.5;
+        }
+
+        .scroll-top-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: var(--border-radius);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 150ms ease;
+            flex-shrink: 0;
+            font-size: 1.5rem;
+        }
+
+        .scroll-top-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        /* Swagger UI - embedded directly, no iframe */
+        #swagger-ui {
+            background: white;
+        }
+
+        /* Hide Swagger UI's own topbar - we have our own header */
+        #swagger-ui .swagger-ui .topbar {
+            display: none;
+        }
+
+        /* Override Swagger UI defaults to match our design */
+        #swagger-ui .swagger-ui .info {
+            margin: 0;
+        }
+
+        #swagger-ui .swagger-ui .info .title {
+            font-family: 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        #swagger-ui .swagger-ui .opblock-tag {
+            font-family: 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
         }
 
         /* Download buttons */
@@ -464,104 +914,526 @@
             margin-top: 1.5rem;
         }
 
+        /* Accordion sections */
+        .accordion {
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius-lg);
+            background: var(--surface);
+            margin-bottom: var(--space-lg);
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-lg) var(--space-xl);
+            background: var(--surface);
+            cursor: pointer;
+            user-select: none;
+            transition: background 150ms ease;
+        }
+
+        .accordion-header:hover {
+            background: var(--surface-alt);
+        }
+
+        .accordion-header h2 {
+            font-size: var(--text-h3);
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .accordion-toggle {
+            width: 10px;
+            height: 10px;
+            border-right: 2px solid var(--text-muted);
+            border-bottom: 2px solid var(--text-muted);
+            transform: rotate(45deg);
+            transition: transform 200ms ease;
+        }
+
+        .accordion.collapsed .accordion-toggle {
+            transform: rotate(-45deg);
+        }
+
+        .accordion-body {
+            padding: 0 var(--space-xl) var(--space-xl);
+            display: block;
+        }
+
+        .accordion.collapsed .accordion-body {
+            display: none;
+        }
+
+        /* Documentation card - side by side layout */
+        .columns-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-xl);
+        }
+
+        @media (max-width: 900px) {
+            .columns-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .columns-section h3 {
+            font-size: var(--text-h4);
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+            color: var(--text);
+        }
+
+        /* Column definitions table */
+        .columns-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: var(--text-body-sm);
+        }
+
+        .columns-table th,
+        .columns-table td {
+            padding: var(--space-sm) var(--space-md);
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        .columns-table th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: var(--surface-alt);
+        }
+
+        .columns-table td {
+            color: var(--text);
+        }
+
+        .columns-table .column-name {
+            font-weight: 500;
+        }
+
+        .columns-table .column-format {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: var(--text-caption);
+            color: var(--text-muted);
+        }
+
+        .columns-table .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: var(--border-radius-sm);
+            font-size: var(--text-caption);
+            font-weight: 500;
+        }
+
+        .columns-table .badge-required {
+            background: var(--error-light);
+            color: var(--error);
+        }
+
+        .columns-table .badge-optional {
+            background: var(--surface-alt);
+            color: var(--text-muted);
+        }
+
+        .columns-table .allowed-values {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .columns-table .allowed-value {
+            display: inline-block;
+            padding: 1px 4px;
+            background: var(--surface-alt);
+            border-radius: 2px;
+            font-family: monospace;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Configuration section layout */
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-xl);
+        }
+
+        .config-grid.single-column {
+            grid-template-columns: 1fr;
+        }
+
+        @media (max-width: 900px) {
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .config-section h3 {
+            font-size: var(--text-h4);
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+            color: var(--text);
+        }
+
+        .config-section.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .config-actions {
+            margin-top: var(--space-xl);
+            padding-top: var(--space-xl);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-md);
+        }
+
+        /* Action section - prominent workflow button */
+        .action-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius-lg);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+            text-align: center;
+        }
+
+        .btn-action {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: var(--space-md) var(--space-2xl);
+            font-size: var(--text-h3);
+            font-weight: 600;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 150ms ease;
+            min-width: 280px;
+        }
+
+        .btn-action:hover:not(:disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-action:disabled {
+            background: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        /* Type badge in hero */
+        /* Workflow metadata inside documentation */
+        .workflow-meta {
+            margin-bottom: var(--space-xl);
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .workflow-meta-type {
+            display: inline-block;
+            font-size: var(--text-caption);
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: var(--space-sm);
+        }
+
+        .workflow-meta-desc {
+            font-size: var(--text-body);
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Rules list */
+        .rule-category {
+            margin-bottom: 1rem;
+        }
+
+        .rule-category-header {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rule-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+
+        .rule-item input[type="checkbox"] {
+            margin-top: 0.25rem;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .rule-item-content {
+            flex: 1;
+        }
+
+        .rule-item-name {
+            font-weight: 500;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rule-item-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .rule-severity {
+            font-size: 0.625rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+
+        .rule-severity.error {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .rule-severity.warning {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .rule-severity.info {
+            background: #e3f2fd;
+            color: var(--info);
+        }
+
+        /* Parameter form */
+        .param-item {
+            margin-bottom: 1rem;
+        }
+
+        .param-item label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .param-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .param-description {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+            margin-left: 1.5rem;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-
-            .mapping-grid {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
 <body>
+    <div class="top-bar">
+        <div class="top-bar__container">
+            <a href="https://www.admin.ch/gov/de/start.html" class="top-bar__link" target="_blank">
+                Alle Schweizer Bundesbehörden
+            </a>
+            <div class="language-selector">
+                <button class="active" data-lang="de">DE</button>
+                <span>|</span>
+                <button data-lang="fr">FR</button>
+                <span>|</span>
+                <button data-lang="it">IT</button>
+                <span>|</span>
+                <button data-lang="en">EN</button>
+            </div>
+        </div>
+    </div>
+
     <header>
-        <div>
-            <h1>GeoDataCheck</h1>
-            <div class="subtitle">BBL - Bundesamt für Bauten und Logistik</div>
+        <div class="header__top">
+            <a class="header-logo" href="#workflows">
+                <img src="assets/swiss-logo-flag.svg" alt="Swiss Coat of Arms" class="logo-flag">
+                <img src="assets/swiss-logo-name.svg" alt="Schweizerische Eidgenossenschaft" class="logo-name">
+                <div class="logo-divider"></div>
+                <div class="header-title">
+                    <strong>Bundesamt für Bauten und Logistik</strong><br>
+                    Abteilung Digital Real Estate und Support<br>
+                    DRES Workflows
+                </div>
+            </a>
+            <div class="session-timer" id="sessionTimer" style="display: none;">
+                Session: <span id="timerDisplay">30:00</span>
+            </div>
         </div>
-        <div class="session-timer" id="sessionTimer" style="display: none;">
-            ⏱️ Session: <span id="timerDisplay">30:00</span>
-        </div>
+        <nav class="main-nav">
+            <div class="container">
+                <ul id="main-nav-list">
+                    <li><a href="#workflows" class="nav-link active" data-route="workflows">Workflows</a></li>
+                    <li><a href="#api" class="nav-link" data-route="api">API</a></li>
+                </ul>
+            </div>
+        </nav>
     </header>
 
     <main>
-        <!-- View 1: Checker Gallery -->
+        <!-- View 1: Workflow Gallery -->
         <div id="galleryView" class="view active">
-            <div class="card">
-                <h2>Verfügbare Checker</h2>
-                <div class="checker-grid" id="checkerGrid">
-                    <!-- Filled by JS -->
-                </div>
+            <nav class="breadcrumb">
+                <span class="breadcrumb-current">Workflows</span>
+            </nav>
+            <h2 class="section-title">Verfügbare Workflows</h2>
+            <div class="workflow-grid" id="workflowGrid">
+                <!-- Filled by JS -->
             </div>
 
-            <div class="privacy-notice">
-                🔒 Ihre Daten werden lokal verarbeitet und niemals gespeichert
-            </div>
         </div>
 
         <!-- View 2: Upload & Configure -->
         <div id="uploadView" class="view">
-            <a class="back-btn" onclick="showView('gallery')">← Zurück zur Übersicht</a>
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a href="#workflows">Workflows</a>
+                <span class="breadcrumb-separator">›</span>
+                <span class="breadcrumb-current" id="breadcrumbWorkflowName">Workflow</span>
+            </nav>
 
-            <div class="card">
-                <div id="checkerInfo">
-                    <span class="checker-card category" id="selectedCategory">QUALITÄTSSICHERUNG</span>
-                    <h2 id="selectedCheckerName">Adress-Checker</h2>
-                    <p id="selectedCheckerDesc">Prüft Schweizer Adressen auf Format, PLZ-Format und Kantone.</p>
+            <!-- Workflow Title -->
+            <div class="workflow-header">
+                <h1 class="section-title" id="selectedCheckerName">EGID/GWR Checker</h1>
+            </div>
+
+            <!-- DOCUMENTATION: Workflow info, Inputs & Outputs -->
+            <div class="accordion" id="documentationAccordion">
+                <div class="accordion-header" onclick="toggleAccordion('documentationAccordion')">
+                    <h2>Dokumentation</h2>
+                    <div class="accordion-toggle"></div>
                 </div>
+                <div class="accordion-body">
+                    <!-- Workflow Metadata -->
+                    <div class="workflow-meta">
+                        <div class="workflow-meta-type" id="selectedCategory">Qualitätssicherung</div>
+                        <p class="workflow-meta-desc" id="selectedCheckerDesc">Prüft Schweizer Adressen auf Format, PLZ-Format und Kantone.</p>
+                    </div>
 
-                <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
+                    <div class="columns-grid" id="columnsGrid">
+                        <!-- Input Columns -->
+                        <div class="columns-section" id="inputColumnsSection" style="display: none;">
+                            <h3>Eingabe-Spalten</h3>
+                            <table class="columns-table" id="inputColumnsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Beschreibung</th>
+                                        <th>Format</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
 
-                <div class="upload-area" id="uploadArea">
-                    <div class="icon">📁</div>
-                    <div><strong>Datei hier ablegen</strong></div>
-                    <div style="color: var(--text-secondary); margin-top: 0.5rem;">oder klicken zum Auswählen</div>
-                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">Unterstützt: .xlsx, .xls</div>
-                    <input type="file" id="fileInput" accept=".xlsx,.xls">
-                </div>
-
-                <div id="fileInfo" style="display: none; margin-top: 1rem;">
-                    <p>📄 <strong id="fileName"></strong> - <span id="rowCount"></span> Zeilen</p>
+                        <!-- Output Columns -->
+                        <div class="columns-section" id="outputColumnsSection" style="display: none;">
+                            <h3>Ausgabe-Spalten</h3>
+                            <table class="columns-table" id="outputColumnsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Beschreibung</th>
+                                        <th>Format</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Column Mapping -->
-            <div class="card" id="mappingCard" style="display: none;">
-                <h2>Spaltenzuordnung</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
-                    Überprüfen Sie die automatisch erkannten Spalten oder passen Sie die Zuordnung an.
-                </p>
-
-                <div class="mapping-grid" id="mappingGrid">
-                    <!-- Filled by JS -->
+            <!-- RULES & OPTIONS (for checkers/converters) -->
+            <div class="accordion" id="rulesAccordion" style="display: none;">
+                <div class="accordion-header" onclick="toggleAccordion('rulesAccordion')">
+                    <h2>Regeln & Optionen</h2>
+                    <div class="accordion-toggle"></div>
                 </div>
-
-                <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
-
-                <h3 style="font-size: 1rem; margin-bottom: 1rem;">Gruppierung für Dashboard</h3>
-                <div class="mapping-grid">
-                    <div class="form-group">
-                        <label>Region / Kanton</label>
-                        <select id="dimRegion"><option value="">-- Nicht verwenden --</option></select>
+                <div class="accordion-body">
+                    <!-- Rules (for checkers) -->
+                    <div id="rulesSection" style="display: none;">
+                        <div id="rulesContainer"></div>
+                        <div style="margin-top: var(--space-md); display: flex; gap: var(--space-sm);">
+                            <button class="btn btn-outline" onclick="toggleAllRules(true)" style="font-size: var(--text-body-sm);">Alle auswählen</button>
+                            <button class="btn btn-outline" onclick="toggleAllRules(false)" style="font-size: var(--text-body-sm);">Alle abwählen</button>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Portfolio-Typ</label>
-                        <select id="dimPortfolio"><option value="">-- Nicht verwenden --</option></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Zuständige Person</label>
-                        <select id="dimResponsible"><option value="">-- Nicht verwenden --</option></select>
+
+                    <!-- Parameters (for converters) -->
+                    <div id="parametersSection" style="display: none;">
+                        <div id="parametersContainer"></div>
                     </div>
                 </div>
+            </div>
 
-                <div style="margin-top: 1.5rem;">
-                    <button class="btn btn-primary" id="validateBtn" onclick="runValidation()">
-                        Validierung starten
-                    </button>
+            <!-- UPLOAD: Drop Zone -->
+            <div class="accordion" id="uploadAccordion">
+                <div class="accordion-header" onclick="toggleAccordion('uploadAccordion')">
+                    <h2>Datei hochladen</h2>
+                    <div class="accordion-toggle"></div>
                 </div>
+                <div class="accordion-body">
+                    <div class="upload-area" id="uploadArea">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <div class="upload-title">Datei hier ablegen</div>
+                        <div class="upload-hint">oder klicken zum Auswählen</div>
+                        <div class="upload-formats">
+                            <span id="formatsList">.xlsx, .xls</span>
+                            <span id="maxSizeInfo" style="display: none;"> · max. <span id="maxSizeValue">50 MB</span></span>
+                        </div>
+                        <input type="file" id="fileInput" accept=".xlsx,.xls">
+                    </div>
+
+                    <div id="fileInfo" style="display: none; margin-top: var(--space-md); padding: var(--space-md); background: var(--success-light); border-radius: var(--border-radius); color: var(--success);">
+                        <strong id="fileName"></strong> — <span id="rowCount"></span> Zeilen geladen
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACTION: Big prominent button -->
+            <div class="action-section" id="actionSection">
+                <button class="btn-action" id="actionBtn" onclick="runWorkflow()" disabled>
+                    Workflow starten
+                </button>
             </div>
 
             <!-- Loading -->
@@ -575,7 +1447,11 @@
 
         <!-- View 3: Results Dashboard -->
         <div id="resultsView" class="view">
-            <a class="back-btn" onclick="showView('gallery')">← Neuer Check</a>
+            <nav class="breadcrumb">
+                <a href="#workflows">Workflows</a>
+                <span class="breadcrumb-separator">›</span>
+                <span class="breadcrumb-current" id="breadcrumbResultsName">Ergebnisse</span>
+            </nav>
 
             <div class="stats-grid">
                 <div class="stat-card">
@@ -685,10 +1561,47 @@
                 </div>
             </div>
         </div>
+
+        <!-- View 4: API Documentation -->
+        <div id="apiView" class="view">
+            <div class="api-header">
+                <nav class="breadcrumb">
+                    <a href="#workflows">Workflows</a>
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-current">API</span>
+                </nav>
+                <h1 class="section-title">API Dokumentation</h1>
+            </div>
+            <div id="swagger-ui"></div>
+        </div>
     </main>
 
+    <section class="contact-section">
+        <div class="container">
+            <div class="contact-details">
+                <h3>Kontakt</h3>
+                <address class="contact-info">
+                    Fellerstrasse 21 | CH-3003 Bern | <a href="mailto:dres@bbl.admin.ch">dres@bbl.admin.ch</a>
+                </address>
+                <small class="contact-copyright">
+                    © Bundesamt für Bauten und Logistik BBL
+                </small>
+            </div>
+            <button class="scroll-top-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Nach oben" aria-label="Nach oben scrollen">
+                ↑
+            </button>
+        </div>
+    </section>
+
     <footer>
-        BBL · Bundesamt für Bauten und Logistik · GeoDataCheck v1.0
+        <div class="container footer-inner">
+            <div class="footer-links">
+                <a href="https://github.com/davras5/geodatacheck" target="_blank">Quellcode</a>
+                <a href="#api">API</a>
+                <a href="https://www.admin.ch/gov/de/start/rechtliches.html" target="_blank">Rechtliches</a>
+            </div>
+            <div class="footer-privacy">Daten werden lokal verarbeitet und niemals gespeichert</div>
+        </div>
     </footer>
 
     <script>
@@ -715,19 +1628,120 @@
         // ====================================================================
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadCheckers();
+            loadWorkflows();
             setupFileUpload();
+            setupLanguageSelector();
+            setupRouter();
         });
 
-        async function loadCheckers() {
+        function setupLanguageSelector() {
+            document.querySelectorAll('.language-selector button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.language-selector button').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    // Future: implement i18n here
+                });
+            });
+        }
+
+        // ====================================================================
+        // URL Router
+        // ====================================================================
+
+        function setupRouter() {
+            // Handle browser back/forward and hash link clicks
+            window.addEventListener('hashchange', handleRoute);
+            window.addEventListener('popstate', handleRoute);
+            // Handle initial URL
+            handleRoute();
+        }
+
+        function handleRoute() {
+            const hash = window.location.hash.slice(1) || 'workflows';
+            const parts = hash.split('/');
+            const route = parts[0];
+            const param = parts[1];
+
+            switch (route) {
+                case 'workflows':
+                case '':
+                    activateView('gallery');
+                    break;
+                case 'workflow':
+                    if (param) {
+                        selectWorkflowById(param, false); // Don't push state
+                    } else {
+                        navigateTo('workflows');
+                    }
+                    break;
+                case 'api':
+                    initSwaggerUI();
+                    activateView('api');
+                    break;
+                case 'results':
+                    activateView('results');
+                    break;
+                default:
+                    navigateTo('workflows');
+            }
+        }
+
+        function navigateTo(route, pushState = true) {
+            if (pushState) {
+                window.history.pushState({}, '', `#${route}`);
+            }
+            handleRoute();
+        }
+
+        function activateView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(`${viewName}View`).classList.add('active');
+
+            // Update main nav active state
+            updateNavActiveState(viewName);
+
+            // Reset state if returning to gallery
+            if (viewName === 'gallery') {
+                state.sessionId = null;
+                state.selectedChecker = null;
+                state.results = null;
+                document.getElementById('fileInput').value = '';
+                document.getElementById('fileInfo').style.display = 'none';
+                document.getElementById('actionBtn').disabled = true;
+                document.getElementById('sessionTimer').style.display = 'none';
+            }
+        }
+
+        function updateNavActiveState(viewName) {
+            // Map view names to routes
+            const routeMap = {
+                'gallery': 'workflows',
+                'upload': 'workflows',
+                'results': 'workflows',
+                'api': 'api'
+            };
+            const activeRoute = routeMap[viewName] || 'workflows';
+
+            // Update nav links
+            document.querySelectorAll('.main-nav .nav-link').forEach(link => {
+                const route = link.getAttribute('data-route');
+                if (route === activeRoute) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        async function loadWorkflows() {
             try {
-                const response = await fetch(`${API_URL}/api/checkers`);
+                const response = await fetch(`${API_URL}/api/workflows`);
                 const data = await response.json();
-                renderCheckers(data.checkers);
+                renderWorkflows(data.workflows);
             } catch (error) {
-                console.error('Error loading checkers:', error);
-                document.getElementById('checkerGrid').innerHTML = `
-                    <p style="color: var(--error);">Fehler beim Laden der Checker. Ist der Server gestartet?</p>
+                console.error('Error loading workflows:', error);
+                document.getElementById('workflowGrid').innerHTML = `
+                    <p style="color: var(--error);">Fehler beim Laden der Workflows. Ist der Server gestartet?</p>
                     <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">
                         Starten Sie den Server mit: <code>uvicorn main:app --reload</code>
                     </p>
@@ -735,23 +1749,39 @@
             }
         }
 
-        function renderCheckers(checkers) {
-            const grid = document.getElementById('checkerGrid');
-            grid.innerHTML = checkers.map(checker => `
-                <div class="checker-card" onclick="selectChecker('${checker.id}')">
-                    <div class="category">${checker.category}</div>
-                    <h3>${checker.name}</h3>
-                    <p>${checker.description}</p>
-                    ${checker.required_columns.length > 0 ? `
-                        <div class="required">
-                            ☐ Erfordert: ${checker.required_columns.join(', ')}
-                        </div>
-                    ` : ''}
-                    <button class="btn-start">
-                        Checker starten <span>→</span>
-                    </button>
+        function renderWorkflows(workflows) {
+            const grid = document.getElementById('workflowGrid');
+            const typeLabels = {
+                'checker': 'Qualitätssicherung',
+                'converter': 'Konvertierung',
+                'enricher': 'Datenanreicherung',
+                'analyzer': 'Analyse'
+            };
+            // Use Lorem Picsum for placeholder images (Unsplash Source API is deprecated)
+            // Different seed numbers give different images
+            const imageSeedsByType = {
+                'checker': [237, 433, 1015],
+                'converter': [1025, 1074, 180],
+                'enricher': [1084, 306, 399],
+                'analyzer': [1060, 1076, 367]
+            };
+            grid.innerHTML = workflows.map((workflow, index) => {
+                const seeds = imageSeedsByType[workflow.type] || [100, 200, 300];
+                const seed = seeds[index % seeds.length];
+                const imageUrl = `https://picsum.photos/seed/${seed}/400/200`;
+                return `
+                <div class="workflow-card" onclick="selectWorkflow('${workflow.id}')">
+                    <div class="card-image">
+                        <img src="${imageUrl}" alt="${workflow.name}" loading="lazy">
+                    </div>
+                    <div class="card-content">
+                        <div class="workflow-type">${typeLabels[workflow.type] || workflow.category}</div>
+                        <h3>${workflow.name}</h3>
+                        <p>${workflow.description}</p>
+                        <button class="btn-arrow">→</button>
+                    </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         // ====================================================================
@@ -790,8 +1820,13 @@
         }
 
         async function handleFile(file) {
-            if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
-                alert('Bitte laden Sie eine Excel-Datei hoch (.xlsx oder .xls)');
+            // Validate file extension based on workflow's accepted formats
+            const workflow = state.selectedChecker;
+            const allowedFormats = workflow?.input?.formats || ['.xlsx', '.xls'];
+            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+
+            if (!allowedFormats.includes(fileExt)) {
+                alert(`Bitte laden Sie eine Datei in einem unterstützten Format hoch: ${allowedFormats.join(', ')}`);
                 return;
             }
 
@@ -799,12 +1834,12 @@
             document.getElementById('fileName').textContent = file.name;
             document.getElementById('fileInfo').style.display = 'block';
 
-            // Upload file
+            // Upload file to workflow-specific endpoint
             const formData = new FormData();
             formData.append('file', file);
 
             try {
-                const response = await fetch(`${API_URL}/api/upload`, {
+                const response = await fetch(`${API_URL}/api/workflows/${workflow.id}/upload`, {
                     method: 'POST',
                     body: formData,
                 });
@@ -826,9 +1861,8 @@
                 state.sessionExpiry = Date.now() + (data.expires_in_minutes * 60 * 1000);
                 startSessionTimer();
 
-                // Show mapping card
-                renderColumnMapping();
-                document.getElementById('mappingCard').style.display = 'block';
+                // Enable workflow button
+                document.getElementById('actionBtn').disabled = false;
 
             } catch (error) {
                 console.error('Upload error:', error);
@@ -836,98 +1870,71 @@
             }
         }
 
-        function renderColumnMapping() {
-            const checker = state.selectedChecker;
-            const mappingGrid = document.getElementById('mappingGrid');
+        // ====================================================================
+        // Workflow Execution
+        // ====================================================================
 
-            // Define fields to map based on checker
-            const fields = [
-                { id: 'plz', label: 'PLZ', required: checker?.required_columns?.includes('plz') },
-                { id: 'ort', label: 'Ort', required: checker?.required_columns?.includes('ort') },
-                { id: 'strasse', label: 'Strasse', required: checker?.required_columns?.includes('strasse') },
-                { id: 'kanton', label: 'Kanton', required: false },
-                { id: 'egid', label: 'EGID', required: checker?.required_columns?.includes('egid') },
-                { id: 'easting', label: 'E-Koordinate', required: checker?.required_columns?.includes('easting') },
-                { id: 'northing', label: 'N-Koordinate', required: checker?.required_columns?.includes('northing') },
-            ];
+        function runWorkflow() {
+            const workflow = state.selectedChecker;
+            if (!workflow) return;
 
-            mappingGrid.innerHTML = fields.map(field => `
-                <div class="form-group">
-                    <label>${field.label}${field.required ? ' *' : ''}</label>
-                    <select id="col_${field.id}">
-                        <option value="">-- Nicht zugeordnet --</option>
-                        ${state.columns.map(col => `
-                            <option value="${col.name}" ${state.detectedMappings[field.id] === col.name ? 'selected' : ''}>
-                                ${col.name}${col.detected_as ? ` (${col.detected_as})` : ''}
-                            </option>
-                        `).join('')}
-                    </select>
-                </div>
-            `).join('');
-
-            // Populate dimension dropdowns
-            ['dimRegion', 'dimPortfolio', 'dimResponsible'].forEach(dimId => {
-                const select = document.getElementById(dimId);
-                select.innerHTML = `
-                    <option value="">-- Nicht verwenden --</option>
-                    ${state.columns.map(col => `
-                        <option value="${col.name}">${col.name}</option>
-                    `).join('')}
-                `;
-            });
-
-            // Auto-select likely dimension columns
-            state.columns.forEach(col => {
-                const name = col.name.toLowerCase();
-                if (name.includes('kanton') || name.includes('region')) {
-                    document.getElementById('dimRegion').value = col.name;
-                }
-                if (name.includes('portfolio') || name.includes('typ') || name.includes('kategorie')) {
-                    document.getElementById('dimPortfolio').value = col.name;
-                }
-                if (name.includes('verantwort') || name.includes('zuständig') || name.includes('bearbeiter')) {
-                    document.getElementById('dimResponsible').value = col.name;
-                }
-            });
+            // Route to appropriate handler based on workflow type
+            switch (workflow.type) {
+                case 'checker':
+                    runValidation();
+                    break;
+                case 'converter':
+                    runConversion();
+                    break;
+                case 'enricher':
+                    runEnrichment();
+                    break;
+                case 'analyzer':
+                    runAnalysis();
+                    break;
+                default:
+                    runValidation(); // Default to validation
+            }
         }
 
-        // ====================================================================
-        // Validation
-        // ====================================================================
+        async function runConversion() {
+            // TODO: Implement conversion workflow
+            alert('Konvertierung wird noch implementiert.');
+        }
+
+        async function runEnrichment() {
+            // TODO: Implement enrichment workflow
+            alert('Anreicherung wird noch implementiert.');
+        }
+
+        async function runAnalysis() {
+            // TODO: Implement analysis workflow
+            alert('Analyse wird noch implementiert.');
+        }
 
         async function runValidation() {
-            if (!state.sessionId) {
+            if (!state.sessionId || !state.selectedChecker) {
                 alert('Bitte laden Sie zuerst eine Datei hoch.');
                 return;
             }
 
-            document.getElementById('mappingCard').style.display = 'none';
             document.getElementById('loadingCard').style.display = 'block';
+            document.getElementById('actionBtn').disabled = true;
 
-            // Gather column mappings
-            const columns = {};
-            ['plz', 'ort', 'strasse', 'kanton', 'egid', 'easting', 'northing'].forEach(field => {
-                const select = document.getElementById(`col_${field}`);
-                if (select && select.value) {
-                    columns[field] = select.value;
-                }
-            });
-
-            const dimensionColumns = {
-                region: document.getElementById('dimRegion').value,
-                portfolio: document.getElementById('dimPortfolio').value,
-                responsible: document.getElementById('dimResponsible').value,
-            };
+            // Get selected rules from UI (if any)
+            const selectedRules = getSelectedRules();
 
             const config = {
-                columns: columns,
+                columns: state.detectedMappings || {},
                 options: {},
-                rule_ids: state.selectedChecker?.rule_ids || null,
-                dimension_columns: dimensionColumns,
+                rule_ids: selectedRules.length > 0 ? selectedRules : null,
+                dimension_columns: {},
             };
 
+            const workflowId = state.selectedChecker.id;
+
             try {
-                const response = await fetch(`${API_URL}/api/validate/${state.sessionId}`, {
+                const response = await fetch(`${API_URL}/api/workflows/${workflowId}/sessions/${state.sessionId}/validate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(config),
@@ -940,12 +1947,12 @@
 
                 state.results = await response.json();
                 renderResults();
-                showView('results');
+                navigateTo('results');
 
             } catch (error) {
                 console.error('Validation error:', error);
                 alert(`Fehler bei der Validierung: ${error.message}`);
-                document.getElementById('mappingCard').style.display = 'block';
+                document.getElementById('actionBtn').disabled = false;
             } finally {
                 document.getElementById('loadingCard').style.display = 'none';
             }
@@ -1054,10 +2061,11 @@
         // ====================================================================
 
         async function downloadReport() {
-            if (!state.sessionId) return;
+            if (!state.sessionId || !state.selectedWorkflow) return;
 
+            const workflowId = state.selectedWorkflow.id;
             try {
-                const response = await fetch(`${API_URL}/api/session/${state.sessionId}/download/report`);
+                const response = await fetch(`${API_URL}/api/workflows/${workflowId}/sessions/${state.sessionId}/report`);
                 if (!response.ok) throw new Error('Download failed');
 
                 const blob = await response.blob();
@@ -1079,33 +2087,318 @@
         // Navigation
         // ====================================================================
 
-        function selectChecker(checkerId) {
-            fetch(`${API_URL}/api/checkers/${checkerId}`)
+        function selectWorkflow(workflowId) {
+            // Navigate via URL router
+            navigateTo(`workflow/${workflowId}`);
+        }
+
+        function selectWorkflowById(workflowId, pushState = true) {
+            fetch(`${API_URL}/api/workflows/${workflowId}`)
                 .then(r => r.json())
-                .then(checker => {
-                    state.selectedChecker = checker;
-                    document.getElementById('selectedCategory').textContent = checker.category;
-                    document.getElementById('selectedCheckerName').textContent = checker.name;
-                    document.getElementById('selectedCheckerDesc').textContent = checker.description_long || checker.description;
-                    showView('upload');
+                .then(workflow => {
+                    state.selectedChecker = workflow;
+
+                    // Type labels
+                    const typeLabels = {
+                        'checker': 'Qualitätssicherung',
+                        'converter': 'Konvertierung',
+                        'enricher': 'Datenanreicherung',
+                        'analyzer': 'Analyse'
+                    };
+
+                    // Basic info
+                    document.getElementById('selectedCategory').textContent = typeLabels[workflow.type] || workflow.category;
+                    document.getElementById('selectedCheckerName').textContent = workflow.name;
+                    document.getElementById('selectedCheckerDesc').textContent = workflow.description_long || workflow.description;
+                    document.getElementById('breadcrumbWorkflowName').textContent = workflow.name;
+
+                    // Render workflow details (input/output)
+                    renderWorkflowDetails(workflow);
+
+                    // Render rules (for checkers)
+                    renderRules(workflow);
+
+                    // Render parameters (for converters)
+                    renderParameters(workflow);
+
+                    // Update file input accept attribute
+                    if (workflow.input && workflow.input.formats) {
+                        const formats = workflow.input.formats.join(',');
+                        document.getElementById('fileInput').setAttribute('accept', formats);
+                    }
+
+                    activateView('upload');
                 })
-                .catch(err => console.error('Error:', err));
+                .catch(err => {
+                    console.error('Error:', err);
+                    navigateTo('workflows');
+                });
+        }
+
+        // ====================================================================
+        // Accordion Toggle
+        // ====================================================================
+
+        function toggleAccordion(accordionId) {
+            const accordion = document.getElementById(accordionId);
+            accordion.classList.toggle('collapsed');
+        }
+
+        // ====================================================================
+        // Workflow Details Rendering
+        // ====================================================================
+
+        function renderWorkflowDetails(workflow) {
+            console.log('renderWorkflowDetails called with:', workflow);
+            console.log('inputs:', workflow.inputs);
+            console.log('outputs:', workflow.outputs);
+
+            const input = workflow.input || {};
+
+            // Update file format info
+            const formatsList = document.getElementById('formatsList');
+            const maxSizeInfo = document.getElementById('maxSizeInfo');
+            const maxSizeValue = document.getElementById('maxSizeValue');
+
+            if (input.formats) {
+                formatsList.textContent = input.formats.join(', ');
+            }
+
+            if (input.max_size_mb) {
+                maxSizeInfo.style.display = 'inline';
+                maxSizeValue.textContent = `${input.max_size_mb} MB`;
+            } else {
+                maxSizeInfo.style.display = 'none';
+            }
+
+            // Render input columns
+            renderColumnTable('input', workflow.inputs || []);
+
+            // Render output columns
+            renderColumnTable('output', workflow.outputs || []);
+
+            // Update grid layout based on which columns exist
+            const hasInputs = workflow.inputs && workflow.inputs.length > 0;
+            const hasOutputs = workflow.outputs && workflow.outputs.length > 0;
+            const columnsGrid = document.getElementById('columnsGrid');
+
+            if (hasInputs && hasOutputs) {
+                columnsGrid.style.gridTemplateColumns = '1fr 1fr';
+            } else if (hasInputs || hasOutputs) {
+                columnsGrid.style.gridTemplateColumns = '1fr';
+            }
+
+            // Hide columns grid if no columns to show (but keep metadata visible)
+            columnsGrid.style.display = (hasInputs || hasOutputs) ? 'grid' : 'none';
+        }
+
+        function renderColumnTable(type, columns) {
+            const section = document.getElementById(`${type}ColumnsSection`);
+            const tbody = document.querySelector(`#${type}ColumnsTable tbody`);
+
+            // Clear previous content
+            tbody.innerHTML = '';
+
+            if (!columns || columns.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+            tbody.innerHTML = columns.map(col => {
+                const formatInfo = col.format_description
+                    ? `${col.format} (${col.format_description})`
+                    : col.format;
+
+                const badge = col.required
+                    ? '<span class="badge badge-required">Pflicht</span>'
+                    : '<span class="badge badge-optional">Optional</span>';
+
+                let allowedValuesHtml = '';
+                if (col.allowed_values && col.allowed_values.length > 0) {
+                    const displayValues = col.allowed_values.length > 6
+                        ? [...col.allowed_values.slice(0, 6), `+${col.allowed_values.length - 6}`]
+                        : col.allowed_values;
+                    allowedValuesHtml = `
+                        <div class="allowed-values">
+                            ${displayValues.map(v => `<span class="allowed-value">${v}</span>`).join('')}
+                        </div>
+                    `;
+                }
+
+                return `
+                    <tr>
+                        <td>
+                            <span class="column-name">${col.name}</span>
+                            ${col.example ? `<br><span class="column-format">z.B. ${col.example}</span>` : ''}
+                        </td>
+                        <td>${col.description}${allowedValuesHtml}</td>
+                        <td><span class="column-format">${formatInfo}</span></td>
+                        <td>${badge}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderRules(workflow) {
+            const rulesAccordion = document.getElementById('rulesAccordion');
+            const rulesSection = document.getElementById('rulesSection');
+            const rulesContainer = document.getElementById('rulesContainer');
+
+            const hasRules = workflow.rules && workflow.rules.length > 0;
+            const hasParams = workflow.parameters && workflow.parameters.length > 0;
+
+            // Show accordion if either rules or parameters exist
+            rulesAccordion.style.display = (hasRules || hasParams) ? 'block' : 'none';
+
+            if (!hasRules) {
+                rulesSection.style.display = 'none';
+                return;
+            }
+
+            rulesSection.style.display = 'block';
+
+            // Group rules by category
+            const categories = workflow.rule_categories || [];
+            const rulesByCategory = {};
+
+            workflow.rules.forEach(rule => {
+                const cat = rule.category || 'other';
+                if (!rulesByCategory[cat]) rulesByCategory[cat] = [];
+                rulesByCategory[cat].push(rule);
+            });
+
+            let html = '';
+
+            // Render by category if categories exist
+            if (categories.length > 0) {
+                categories.forEach(cat => {
+                    const rules = rulesByCategory[cat.id] || [];
+                    if (rules.length === 0) return;
+
+                    html += `
+                        <div class="rule-category">
+                            <div class="rule-category-header">${cat.name_de}</div>
+                            ${rules.map(rule => renderRuleItem(rule)).join('')}
+                        </div>
+                    `;
+                });
+            } else {
+                // No categories, render flat list
+                html = workflow.rules.map(rule => renderRuleItem(rule)).join('');
+            }
+
+            rulesContainer.innerHTML = html;
+        }
+
+        function renderRuleItem(rule) {
+            const severityLabels = { error: 'Fehler', warning: 'Warnung', info: 'Info' };
+            return `
+                <div class="rule-item">
+                    <input type="checkbox" id="rule_${rule.id}" ${rule.default_enabled ? 'checked' : ''} data-rule-id="${rule.id}">
+                    <div class="rule-item-content">
+                        <div class="rule-item-name">
+                            ${rule.name_de}
+                            <span class="rule-severity ${rule.severity}">${severityLabels[rule.severity] || rule.severity}</span>
+                        </div>
+                        <div class="rule-item-desc">${rule.description_de}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleAllRules(checked) {
+            document.querySelectorAll('#rulesContainer input[type="checkbox"]').forEach(cb => {
+                cb.checked = checked;
+            });
+        }
+
+        function getSelectedRules() {
+            const selected = [];
+            document.querySelectorAll('#rulesContainer input[type="checkbox"]:checked').forEach(cb => {
+                selected.push(cb.dataset.ruleId);
+            });
+            return selected;
+        }
+
+        function renderParameters(workflow) {
+            const rulesAccordion = document.getElementById('rulesAccordion');
+            const parametersSection = document.getElementById('parametersSection');
+            const parametersContainer = document.getElementById('parametersContainer');
+
+            const hasRules = workflow.rules && workflow.rules.length > 0;
+            const hasParams = workflow.parameters && workflow.parameters.length > 0;
+
+            // Show accordion if either rules or parameters exist
+            if (hasParams && !hasRules) {
+                rulesAccordion.style.display = 'block';
+            }
+
+            if (!hasParams) {
+                parametersSection.style.display = 'none';
+                return;
+            }
+
+            parametersSection.style.display = 'block';
+
+            parametersContainer.innerHTML = workflow.parameters.map(param => {
+                if (param.type === 'boolean') {
+                    return `
+                        <div class="param-item">
+                            <label>
+                                <input type="checkbox" id="param_${param.id}" ${param.default ? 'checked' : ''} data-param-id="${param.id}">
+                                ${param.name_de}
+                            </label>
+                            ${param.description_de ? `<div class="param-description">${param.description_de}</div>` : ''}
+                        </div>
+                    `;
+                } else if (param.type === 'select') {
+                    const options = param.options.map(opt => {
+                        const value = typeof opt === 'string' ? opt : opt.value;
+                        const label = typeof opt === 'string' ? opt : opt.label;
+                        const selected = value === param.default ? 'selected' : '';
+                        return `<option value="${value}" ${selected}>${label}</option>`;
+                    }).join('');
+                    return `
+                        <div class="form-group">
+                            <label>${param.name_de}</label>
+                            <select id="param_${param.id}" data-param-id="${param.id}">
+                                ${options}
+                            </select>
+                            ${param.description_de ? `<div class="param-description" style="margin-left: 0;">${param.description_de}</div>` : ''}
+                        </div>
+                    `;
+                }
+                return '';
+            }).join('');
+        }
+
+        function getParameters() {
+            const params = {};
+            document.querySelectorAll('#parametersContainer [data-param-id]').forEach(el => {
+                const id = el.dataset.paramId;
+                if (el.type === 'checkbox') {
+                    params[id] = el.checked;
+                } else {
+                    params[id] = el.value;
+                }
+            });
+            return params;
         }
 
         function showView(viewName) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(`${viewName}View`).classList.add('active');
+            // Use router for navigation
+            const routes = {
+                'gallery': 'workflows',
+                'upload': state.selectedChecker ? `workflow/${state.selectedChecker.id}` : 'workflows',
+                'results': 'results',
+                'api': 'api'
+            };
+            navigateTo(routes[viewName] || 'workflows');
+        }
 
-            // Reset upload view if returning to gallery
-            if (viewName === 'gallery') {
-                state.sessionId = null;
-                state.selectedChecker = null;
-                state.results = null;
-                document.getElementById('fileInput').value = '';
-                document.getElementById('fileInfo').style.display = 'none';
-                document.getElementById('mappingCard').style.display = 'none';
-                document.getElementById('sessionTimer').style.display = 'none';
-            }
+        function showApiDocs() {
+            navigateTo('api');
         }
 
         function switchTab(tabName) {
@@ -1145,6 +2438,33 @@
             updateTimer();
             setInterval(updateTimer, 1000);
         }
+
+        // ====================================================================
+        // Swagger UI Initialization
+        // ====================================================================
+
+        let swaggerUIInitialized = false;
+
+        function initSwaggerUI() {
+            if (swaggerUIInitialized) return;
+
+            SwaggerUIBundle({
+                url: `${API_URL}/openapi.json`,
+                dom_id: '#swagger-ui',
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                layout: 'StandaloneLayout',
+                deepLinking: true,
+                showExtensions: true,
+                showCommonExtensions: true
+            });
+
+            swaggerUIInitialized = true;
+        }
     </script>
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
 </body>
 </html>

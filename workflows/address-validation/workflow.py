@@ -1,8 +1,8 @@
 """
-Address Validation Rules
-========================
+Address Validation Workflow
+===========================
 
-All checking rules for Swiss address validation.
+Validation rules and logic for Swiss address validation.
 Business documentation: see README.md
 """
 
