@@ -694,11 +694,11 @@
     <script>
         // API base URL - auto-detects environment
         // Local: http://localhost:8000
-        // Production: https://geodatacheck-api.fly.dev (change to your app name)
+        // Production: https://geodatacheck.fly.dev
         const API_URL = window.location.hostname === 'localhost'
             || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:8000'
-            : 'https://geodatacheck-api.fly.dev';
+            : 'https://geodatacheck.fly.dev';
 
         // State
         let state = {
