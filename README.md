@@ -157,40 +157,6 @@ Environment variables (set in `fly.toml` or `.env`):
 
 ---
 
-## Input File Format
-
-The EGID/GWR Checker expects Excel (.xlsx, .xls) or CSV files with these columns:
-
-| Column | Required | Description |
-|--------|----------|-------------|
-| `bbl_id` | Yes | Internal BBL identifier |
-| `av_egid` | Yes | Swiss building identifier (EGID) |
-| `wgs84_lat` | No | Latitude (WGS84) |
-| `wgs84_lon` | No | Longitude (WGS84) |
-| `adr_reg` | No | Canton (e.g., BE, ZH) |
-| `adr_ort` | No | City name |
-| `adr_plz` | No | Postal code (4 digits) |
-| `adr_str` | No | Street name |
-| `adr_hsnr` | No | House number |
-
-Column names are auto-detected using common naming patterns.
-
----
-
-## Validation Rules
-
-| ID | Rule | Severity |
-|----|------|----------|
-| R-GWR-01 | EGID must not be empty or 0 | Error |
-| R-GWR-02 | EGID must be unique in dataset | Warning |
-| R-GWR-03 | Coordinates missing (enriched from GWR) | Info |
-| R-GWR-04 | Address incomplete (enriched from GWR) | Info |
-| R-GWR-05 | Address mismatch with GWR | Warning |
-| R-GWR-06 | Coordinates deviate >50m from GWR | Warning |
-| R-GWR-07 | EGID not found in GWR | Error |
-
----
-
 ## License
 
 MIT License - see [LICENSE](LICENSE)
