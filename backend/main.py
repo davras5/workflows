@@ -94,11 +94,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static assets (logos, icons)
-assets_path = Path(__file__).parent.parent / "assets"
-if assets_path.exists():
-    app.mount("/assets", StaticFiles(directory=str(assets_path)), name="assets")
-
 # Initialize validation engine
 registry = create_default_registry()
 engine = ValidationEngine(registry)
@@ -148,6 +143,27 @@ async def root():
 async def health():
     """Health check endpoint."""
     return {"status": "ok", "service": "GeoDataCheck API", "version": "1.0.0"}
+
+
+@app.get("/assets/{filename:path}")
+async def serve_assets(filename: str):
+    """Serve static assets (logos, icons)."""
+    assets_path = Path(__file__).parent.parent / "assets" / filename
+    if assets_path.exists() and assets_path.is_file():
+        # Determine media type
+        suffix = assets_path.suffix.lower()
+        media_types = {
+            '.svg': 'image/svg+xml',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.ico': 'image/x-icon',
+            '.css': 'text/css',
+            '.js': 'application/javascript',
+        }
+        media_type = media_types.get(suffix, 'application/octet-stream')
+        return FileResponse(assets_path, media_type=media_type)
+    raise HTTPException(status_code=404, detail=f"Asset not found: {filename}")
 
 
 @app.get("/api/rules")
