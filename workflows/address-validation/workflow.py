@@ -351,26 +351,29 @@ class GWRClient:
 
 
 # =============================================================================
-# Column Auto-Detection
+# Column Detection (Exact Match)
 # =============================================================================
 
-# Mapping of logical column names to possible variations (case-insensitive)
-COLUMN_PATTERNS = {
-    'bbl_id': ['bbl_id', 'bblid', 'bbl-id', 'id', 'objekt_id', 'objektid'],
-    'av_egid': ['av_egid', 'egid', 'gwr_egid', 'gebaeude_id', 'building_id'],
-    'wgs84_lat': ['wgs84_lat', 'lat', 'latitude', 'breitengrad', 'y', 'coord_y'],
-    'wgs84_lon': ['wgs84_lon', 'lon', 'lng', 'longitude', 'laengengrad', 'x', 'coord_x'],
-    'adr_reg': ['adr_reg', 'kanton', 'canton', 'region', 'kt', 'state'],
-    'adr_ort': ['adr_ort', 'ort', 'city', 'stadt', 'gemeinde', 'municipality', 'ortschaft'],
-    'adr_plz': ['adr_plz', 'plz', 'zip', 'postleitzahl', 'postal_code', 'npa'],
-    'adr_str': ['adr_str', 'strasse', 'street', 'str', 'strassenname', 'rue'],
-    'adr_hsnr': ['adr_hsnr', 'hausnummer', 'hsnr', 'hnr', 'house_number', 'nr', 'numero'],
+# Expected column names (exact match required)
+EXPECTED_COLUMNS = {
+    'bbl_id': 'bbl_id',
+    'av_egid': 'av_egid',
+    'wgs84_lat': 'wgs84_lat',
+    'wgs84_lon': 'wgs84_lon',
+    'adr_reg': 'adr_reg',
+    'adr_ort': 'adr_ort',
+    'adr_plz': 'adr_plz',
+    'adr_str': 'adr_str',
+    'adr_hsnr': 'adr_hsnr',
 }
+
+# Required columns (must be present)
+REQUIRED_COLUMNS = ['bbl_id', 'av_egid']
 
 
 def auto_detect_columns(df: pd.DataFrame) -> Dict[str, str]:
     """
-    Auto-detect column mappings based on column names.
+    Detect columns using exact name matching.
 
     Args:
         df: Input DataFrame
@@ -379,13 +382,24 @@ def auto_detect_columns(df: pd.DataFrame) -> Dict[str, str]:
         Dict mapping logical names to actual column names found in df
     """
     detected = {}
+    warnings = []
     df_columns_lower = {col.lower(): col for col in df.columns}
 
-    for logical_name, patterns in COLUMN_PATTERNS.items():
-        for pattern in patterns:
-            if pattern.lower() in df_columns_lower:
-                detected[logical_name] = df_columns_lower[pattern.lower()]
-                break
+    for logical_name, expected_name in EXPECTED_COLUMNS.items():
+        if expected_name.lower() in df_columns_lower:
+            detected[logical_name] = df_columns_lower[expected_name.lower()]
+        else:
+            # Check if column is required
+            if logical_name in REQUIRED_COLUMNS:
+                warnings.append(f"Pflichtfeld '{expected_name}' nicht gefunden")
+            else:
+                warnings.append(f"Optionales Feld '{expected_name}' nicht gefunden")
+
+    # Print warnings if any columns are missing
+    if warnings:
+        print("Spalten-Warnungen:")
+        for warning in warnings:
+            print(f"  - {warning}")
 
     return detected
 

@@ -21,18 +21,21 @@ Dieser Workflow validiert Adressdaten für Schweizer Immobilienportfolios. Er pr
 
 **Dateiformate**: Excel (.xlsx, .xls)
 
-**Erwartete Spalten**:
+**Erwartete Spalten** (exakte Spaltennamen erforderlich):
 
 | Spalte | Pflicht | Beschreibung | Beispiel |
 |--------|---------|--------------|----------|
-| PLZ | Ja | Postleitzahl | 8001 |
-| Ort | Ja | Ortschaft | Zürich |
-| Strasse | Nein | Strassenname | Bahnhofstrasse |
-| Hausnummer | Nein | Hausnummer | 42a |
-| Kanton | Nein | Kantonsabkürzung | ZH |
-| EGID | Nein | Gebäudeidentifikator | 123456789 |
-| E_COORD | Nein | E-Koordinate (LV95 oder WGS84) | 2683000 |
-| N_COORD | Nein | N-Koordinate (LV95 oder WGS84) | 1248000 |
+| bbl_id | Ja | BBL Objekt-ID | 12345 |
+| av_egid | Ja | Eidg. Gebäudeidentifikator (EGID) | 123456789 |
+| adr_plz | Nein | Postleitzahl | 8001 |
+| adr_ort | Nein | Ortschaft | Zürich |
+| adr_str | Nein | Strassenname | Bahnhofstrasse |
+| adr_hsnr | Nein | Hausnummer | 42a |
+| adr_reg | Nein | Kanton (2-stellig) | ZH |
+| wgs84_lat | Nein | Breitengrad (WGS84) | 47.376887 |
+| wgs84_lon | Nein | Längengrad (WGS84) | 8.541694 |
+
+**Hinweis**: Spalten mit abweichenden Namen werden nicht erkannt. Bei fehlenden Spalten wird eine Warnung ausgegeben.
 
 ---
 
