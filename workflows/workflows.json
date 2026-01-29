@@ -215,9 +215,41 @@
           "category": "completeness"
         },
         {
-          "id": "R-GWR-04",
-          "name_de": "Adresse unvollständig",
-          "description_de": "Adressfelder fehlen (werden vom GWR ergänzt)",
+          "id": "R-GWR-04a",
+          "name_de": "Kanton fehlt",
+          "description_de": "adr_reg (Kanton) fehlt oder ist leer",
+          "severity": "info",
+          "default_enabled": true,
+          "category": "completeness"
+        },
+        {
+          "id": "R-GWR-04b",
+          "name_de": "Ort fehlt",
+          "description_de": "adr_ort (Ortsname) fehlt oder ist leer",
+          "severity": "info",
+          "default_enabled": true,
+          "category": "completeness"
+        },
+        {
+          "id": "R-GWR-04c",
+          "name_de": "PLZ fehlt",
+          "description_de": "adr_plz (Postleitzahl) fehlt oder ist leer",
+          "severity": "info",
+          "default_enabled": true,
+          "category": "completeness"
+        },
+        {
+          "id": "R-GWR-04d",
+          "name_de": "Strasse fehlt",
+          "description_de": "adr_str (Strassenname) fehlt oder ist leer",
+          "severity": "info",
+          "default_enabled": true,
+          "category": "completeness"
+        },
+        {
+          "id": "R-GWR-04e",
+          "name_de": "Hausnummer fehlt",
+          "description_de": "adr_hsnr (Hausnummer) fehlt oder ist leer",
           "severity": "info",
           "default_enabled": true,
           "category": "completeness"

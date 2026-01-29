@@ -527,6 +527,28 @@ class GWREnricher:
                 except ValueError:
                     pass
 
+            # R-GWR-04a-e: Check address field completeness
+            address_field_checks = [
+                ('adr_reg', 'R-GWR-04a', 'Kanton (adr_reg) fehlt oder ist leer'),
+                ('adr_ort', 'R-GWR-04b', 'Ort (adr_ort) fehlt oder ist leer'),
+                ('adr_plz', 'R-GWR-04c', 'PLZ (adr_plz) fehlt oder ist leer'),
+                ('adr_str', 'R-GWR-04d', 'Strasse (adr_str) fehlt oder ist leer'),
+                ('adr_hsnr', 'R-GWR-04e', 'Hausnummer (adr_hsnr) fehlt oder ist leer'),
+            ]
+            for field_key, rule_id, message in address_field_checks:
+                col = column_mapping.get(field_key)
+                if col and col in row.index:
+                    val = row.get(col)
+                    if pd.isna(val) or str(val).strip() == '':
+                        errors.append(ValidationError(
+                            row_index=idx,
+                            column=col,
+                            rule_id=rule_id,
+                            severity="info",
+                            message=message,
+                            value=val
+                        ))
+
             # Look up GWR data
             gwr = gwr_cache.get(egid_str)
 
