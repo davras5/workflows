@@ -1,7 +1,7 @@
 # Fly.io Configuration for GeoDataCheck Backend
 # See https://fly.io/docs/reference/configuration/
 
-app = "geodatacheck"
+app = "app-white-dew-8499"
 primary_region = "fra"  # Frankfurt, Germany (closest to Switzerland)
 
 [build]
