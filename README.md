@@ -1,8 +1,8 @@
-# GeoDataCheck
+# Workflows
 
-**Geo data validation tool for Swiss building portfolios**
+**Data management workflows for Swiss federal real estate**
 
-A web application for validating and enriching building data against official Swiss registers, built for the Swiss Federal Office for Buildings and Logistics (BBL).
+A web application providing data validation, enrichment, and conversion workflows for building and facility management data. Built for the Digital Real Estate and Support (DRES) department at the Swiss Federal Office for Buildings and Logistics (BBL).
 
 ![Swiss Federal Design](https://img.shields.io/badge/Design-Swiss%20Federal%20CD-DC0018)
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
@@ -10,9 +10,18 @@ A web application for validating and enriching building data against official Sw
 
 ---
 
-## Features
+## Workflows
 
-### EGID/GWR Checker
+| Workflow | Type | Status | Description |
+|----------|------|--------|-------------|
+| **EGID/GWR Checker** | Validator | Productive | Validates building data against the Swiss GWR register |
+| **IFC to Excel** | Converter | In Development | Converts IFC building models to Excel format |
+| **CAFM-Basisplan Checker** | Validator | In Development | Validates CAFM floor plans against BBL requirements |
+
+---
+
+## EGID/GWR Checker
+
 Validates and enriches building data against the official Swiss Gebäude- und Wohnungsregister (GWR):
 
 - **EGID Validation** - Checks that building identifiers exist in the GWR
@@ -21,13 +30,14 @@ Validates and enriches building data against the official Swiss Gebäude- und Wo
 - **Data Enrichment** - Fills in missing coordinates and address components from GWR
 - **Match Scoring** - Generates evaluation scores (Match/Partial/Mismatch/Not Found)
 
-### Export
-- Multi-tab Excel reports with:
-  - **Rules** - Description of validation rules applied
-  - **Meta** - Input/output column definitions
-  - **Input** - Original uploaded data
-  - **Output** - Enriched data with GWR results
-  - **Warnings** - Detailed error/warning list with row references
+### Export Format
+
+Multi-tab Excel reports with:
+- **Rules** - Description of validation rules applied
+- **Meta** - Input/output column definitions
+- **Input** - Original uploaded data
+- **Output** - Enriched data with GWR results
+- **Warnings** - Detailed error/warning list with row references
 
 ---
 
@@ -38,7 +48,7 @@ Validates and enriches building data against the official Swiss Gebäude- und Wo
 | Backend | Python 3.11, FastAPI, Pandas |
 | Frontend | Single HTML file (vanilla JS) |
 | Styling | Swiss Federal Corporate Design |
-| API | geo.admin.ch GWR Feature Service |
+| External APIs | geo.admin.ch GWR Feature Service |
 | Deployment | Fly.io (Docker) |
 
 ---
@@ -53,8 +63,8 @@ Validates and enriches building data against the official Swiss Gebäude- und Wo
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/geodatacheck.git
-   cd geodatacheck
+   git clone https://github.com/yourusername/workflows.git
+   cd workflows
    ```
 
 2. **Install dependencies**
@@ -68,12 +78,8 @@ Validates and enriches building data against the official Swiss Gebäude- und Wo
    uvicorn main:app --reload --port 8000
    ```
 
-4. **Open the frontend**
-   - Open `index.html` directly in your browser, or
-   - Serve it with any static file server
-
-5. **Access the application**
-   - Frontend: `http://localhost:8000` (when running backend)
+4. **Access the application**
+   - Frontend: `http://localhost:8000`
    - API docs: `http://localhost:8000/docs`
 
 ---
@@ -81,7 +87,7 @@ Validates and enriches building data against the official Swiss Gebäude- und Wo
 ## Project Structure
 
 ```
-geodatacheck/
+workflows/
 ├── backend/
 │   ├── main.py              # FastAPI application
 │   ├── requirements.txt     # Python dependencies
@@ -114,8 +120,8 @@ geodatacheck/
 | `GET` | `/api/health` | Health check |
 | `GET` | `/api/workflows` | List available workflows |
 | `GET` | `/api/workflows/{id}` | Get workflow details |
-| `POST` | `/api/workflows/{id}/upload` | Upload file for validation |
-| `POST` | `/api/workflows/{id}/sessions/{sid}/validate` | Run validation |
+| `POST` | `/api/workflows/{id}/upload` | Upload file for processing |
+| `POST` | `/api/workflows/{id}/sessions/{sid}/validate` | Run workflow |
 | `GET` | `/api/workflows/{id}/sessions/{sid}/report` | Download Excel report |
 
 Full API documentation available at `/docs` (Swagger UI).
@@ -140,8 +146,8 @@ fly deploy
 ### Docker (Manual)
 
 ```bash
-docker build -t geodatacheck .
-docker run -p 8080:8080 geodatacheck
+docker build -t workflows .
+docker run -p 8080:8080 workflows
 ```
 
 ---
@@ -167,4 +173,5 @@ MIT License - see [LICENSE](LICENSE)
 
 - [geo.admin.ch](https://geo.admin.ch) - Swiss Federal Geoportal
 - [Swiss Federal Corporate Design](https://www.bk.admin.ch/bk/de/home/dokumentation/cd-bund.html)
-- Built for **Bundesamt für Bauten und Logistik (BBL)**, Abteilung Digital Real Estate und Support
+
+Built by **Bundesamt für Bauten und Logistik (BBL)**, Abteilung Digital Real Estate und Support
