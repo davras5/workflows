@@ -96,14 +96,51 @@ Dieser Workflow validiert und ergänzt Gebäudedaten anhand des offiziellen Schw
 | eval_score | Match-Score (0-100%) |
 | eval_label | Bewertungskategorie |
 
-**Bewertungskategorien (eval_label):**
+#### Berechnung des eval_score
+
+Der Match-Score wird als Prozentsatz der übereinstimmenden Felder berechnet:
+
+```
+eval_score = (Anzahl übereinstimmende Felder / Anzahl geprüfte Felder) × 100
+```
+
+**Geprüfte Felder:**
+
+| Feld | Vergleichsmethode | Toleranz |
+|------|-------------------|----------|
+| Koordinaten (lat/lon) | Haversine-Distanz | ≤ 50 Meter |
+| Kanton (adr_reg) | String-Vergleich (normalisiert) | Exakt |
+| PLZ (adr_plz) | String-Vergleich (normalisiert) | Exakt |
+| Ort (adr_ort) | String-Vergleich (normalisiert) | Exakt |
+| Strasse (adr_str) | String-Vergleich (normalisiert) | Exakt |
+| Hausnummer (adr_hsnr) | String-Vergleich (normalisiert) | Exakt |
+
+**Normalisierung:** Strings werden vor dem Vergleich in Kleinbuchstaben umgewandelt, getrimmt und Punkte/Kommas entfernt (z.B. "Bahnhofstr." = "bahnhofstr").
+
+**Hinweise:**
+- Nur Felder, die sowohl in den Eingabedaten als auch im GWR vorhanden sind, werden verglichen
+- Leere oder fehlende Felder werden nicht in die Berechnung einbezogen
+- Wenn keine Felder verglichen werden können (alle leer), wird ein Score von 100 angenommen
+
+#### Beispiel
+
+| Eingabe | GWR | Match |
+|---------|-----|-------|
+| PLZ: 8001 | PLZ: 8001 | ✓ |
+| Ort: Zürich | Ort: Zürich | ✓ |
+| Strasse: Bahnhofstr. | Strasse: Bahnhofstrasse | ✗ |
+| Hausnummer: 42 | Hausnummer: 42 | ✓ |
+
+→ Score: 3/4 = **75%** → Label: **Partial**
+
+#### Bewertungskategorien (eval_label)
 
 | Label | Score | Bedeutung |
 |-------|-------|-----------|
-| Match | ≥ 90% | Vollständige Übereinstimmung |
-| Partial | 50-89% | Teilweise Übereinstimmung |
-| Mismatch | < 50% | Starke Abweichungen |
-| Not Found | - | EGID nicht im GWR gefunden |
+| Match | ≥ 90% | Vollständige Übereinstimmung mit GWR |
+| Partial | 50-89% | Teilweise Übereinstimmung, manuelle Prüfung empfohlen |
+| Mismatch | < 50% | Starke Abweichungen, Datenkorrektur erforderlich |
+| Not Found | - | EGID existiert nicht im GWR (R-GWR-07) |
 
 ### Ergebniszusammenfassung
 
